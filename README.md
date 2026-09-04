@@ -155,13 +155,15 @@ Development Tools
 * Postman / cURL
 * Maven
 
- Project Structure
+Project Structure
 
 
 Smart-Market-Watchlist/
 │
 ├── backend/
+
 │   ├── src/
+
 │   │   └── main/
 │   │       ├── java/
 │   │       │   └── com/
