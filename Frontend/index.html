@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Market Watchlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0E14;
+    --panel: #131720;
+    --panel-hover: #171C27;
+    --border: #232A38;
+    --text: #E6EAF0;
+    --muted: #6B7280;
+    --up: #3FB950;
+    --down: #F85149;
+    --flag: #F5B942;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  #clock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  input {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  input:focus {
+    outline: none;
+    border-color: var(--text);
+  }
+
+  form button {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  form button:hover { background: #C9D1DB; }
+
+  .col-labels {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.6fr;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 16px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.6fr;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    border-left: 3px solid transparent;
+  }
+
+  .row.flagged {
+    border-left-color: var(--flag);
+    background: rgba(245, 185, 66, 0.05);
+    animation: pulse 1.4s ease-out 1;
+  }
+
+  @keyframes pulse {
+    0%   { background: rgba(245, 185, 66, 0.22); }
+    100% { background: rgba(245, 185, 66, 0.05); }
+  }
+
+  .name .sym {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .name .co {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    text-align: right;
+    padding-right: 12px;
+  }
+
+  .change {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-align: right;
+    padding-right: 12px;
+  }
+
+  .change.up { color: var(--up); }
+  .change.down { color: var(--down); }
+  .change.flat { color: var(--muted); }
+
+  .flag-tag {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    color: var(--flag);
+    margin-top: 3px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .actions input {
+    width: 78px;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .actions button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .actions button:hover { border-color: var(--text); }
+
+  .actions button.del:hover {
+    border-color: var(--down);
+    color: var(--down);
+  }
+
+  .updated {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  #empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 60px 0;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    form { grid-template-columns: 1fr 1fr; }
+    .col-labels { display: none; }
+    .row { grid-template-columns: 1fr; row-gap: 10px; }
+    .price, .change { text-align: left; padding-right: 0; }
+    .actions { justify-content: flex-start; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Smart Market Watchlist</h1>
+    <span id="clock"></span>
+  </header>
+
+  <form id="addForm">
+    <input type="text" id="symbol" placeholder="SYMBOL" required>
+    <input type="text" id="companyName" placeholder="Company name" required>
+    <input type="number" id="currentPrice" placeholder="Price" step="0.01" required>
+    <button type="submit">Add</button>
+  </form>
+
+  <div class="col-labels">
+    <span>Stock</span>
+    <span style="text-align:right; padding-right:12px;">Price</span>
+    <span style="text-align:right; padding-right:12px;">Change</span>
+    <span></span>
+  </div>
+
+  <div id="list"></div>
+  <div id="empty" style="display:none;">Nothing on your watchlist yet. Add a stock above to start tracking it.</div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:8080/api/watchlist";
+
+function tickClock() {
+  document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+async function loadWatchlist() {
+  const res = await fetch(API_BASE);
+  const items = await res.json();
+  renderList(items);
+}
+
+function renderList(items) {
+  const list = document.getElementById("list");
+  const empty = document.getElementById("empty");
+  list.innerHTML = "";
+
+  if (items.length === 0) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "row" + (item.meaningfulChange ? " flagged" : "");
+
+    const dir = item.changeAmount > 0 ? "up" : (item.changeAmount < 0 ? "down" : "flat");
+    const sign = item.changeAmount > 0 ? "+" : "";
+
+    row.innerHTML = `
+      <div class="name">
+        <div class="sym">${item.symbol}</div>
+        <div class="co">${item.companyName}</div>
+      </div>
+      <div class="price">
+        ₹${item.currentPrice.toFixed(2)}
+        <div class="updated">${formatTime(item.priceUpdatedAt)}</div>
+      </div>
+      <div class="change ${dir}">
+        ${sign}${item.changeAmount.toFixed(2)} (${sign}${item.changePercent.toFixed(2)}%)
+        ${item.meaningfulChange ? '<span class="flag-tag">● meaningful</span>' : ''}
+      </div>
+      <div class="actions">
+        <input type="number" step="0.01" placeholder="new" id="price-${item.id}">
+        <button onclick="updatePrice(${item.id})">Update</button>
+        <button class="del" onclick="deleteItem(${item.id})">Del</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function formatTime(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+document.getElementById("addForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+  const companyName = document.getElementById("companyName").value.trim();
+  const currentPrice = parseFloat(document.getElementById("currentPrice").value);
+
+  await fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ symbol, companyName, currentPrice })
+  });
+
+  e.target.reset();
+  loadWatchlist();
+});
+
+async function updatePrice(id) {
+  const input = document.getElementById(`price-${id}`);
+  const newPrice = parseFloat(input.value);
+  if (isNaN(newPrice)) {
+    alert("Enter a valid price first.");
+    return;
+  }
+
+  await fetch(`${API_BASE}/${id}/price`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ currentPrice: newPrice })
+  });
+
+  loadWatchlist();
+}
+
+async function deleteItem(id) {
+  if (!confirm("Remove this stock from your watchlist?")) return;
+  await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+  loadWatchlist();
+}
+
+loadWatchlist();
+</script>
+
+</body>
+</html>
