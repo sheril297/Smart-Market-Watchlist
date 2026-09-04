@@ -155,35 +155,6 @@ Development Tools
 * Postman / cURL
 * Maven
 
-Project Structure
-
-
-Smart-Market-Watchlist/
-│
-├── backend/
-
-│   ├── src/
-
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── com/
-│   │       │       └── scheduler/
-│   │       │           └── distributed_job_scheduler/
-│   │       │               ├── controller/
-│   │       │               ├── service/
-│   │       │               ├── repository/
-│   │       │               ├── entity/
-│   │       │               └── config/
-│   │       │
-│   │       └── resources/
-│   │
-│   ├── pom.xml
-│   └── .gitignore
-│
-├── frontend/
-│   └── index.html
-│
-└── README.md
 
 REST API
 
