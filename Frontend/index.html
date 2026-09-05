@@ -1,348 +1,1556 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Smart Market Watchlist</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --bg: #0B0E14;
-    --panel: #131720;
-    --panel-hover: #171C27;
-    --border: #232A38;
-    --text: #E6EAF0;
-    --muted: #6B7280;
-    --up: #3FB950;
-    --down: #F85149;
-    --flag: #F5B942;
-  }
 
-  * { box-sizing: border-box; }
+:root {
+    --bg: #080b12;
+    --sidebar: #0d111a;
+    --card: #111722;
+    --card-hover: #151c29;
+    --border: #202938;
 
-  body {
+    --text: #f1f5f9;
+    --muted: #7d8798;
+
+    --green: #22c55e;
+    --green-soft: rgba(34,197,94,0.10);
+
+    --red: #ef4444;
+    --red-soft: rgba(239,68,68,0.10);
+
+    --yellow: #f5b942;
+    --yellow-soft: rgba(245,185,66,0.10);
+
+    --blue: #5b8cff;
+    --blue-soft: rgba(91,140,255,0.10);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
     margin: 0;
-    background: var(--bg);
+    background:
+        radial-gradient(circle at 70% 0%, rgba(91,140,255,0.08), transparent 35%),
+        var(--bg);
     color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    padding: 48px 24px 80px;
-  }
+    font-family: 'Inter', sans-serif;
+}
 
-  .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-  }
+/* ================= SIDEBAR ================= */
 
-  header {
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 230px;
+
+    background: rgba(13,17,26,0.95);
+    border-right: 1px solid var(--border);
+
+    padding: 28px 18px;
+
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-  }
+    flex-direction: column;
+}
 
-  h1 {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-
-  #clock {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  form {
-    display: grid;
-    grid-template-columns: 1fr 1.6fr 1fr auto;
+.logo {
+    display: flex;
+    align-items: center;
     gap: 10px;
-    margin-bottom: 28px;
-  }
 
-  input {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    padding: 10px 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
-  }
+    padding: 0 10px 30px;
+}
 
-  input::placeholder { color: var(--muted); }
+.logo-icon {
+    width: 36px;
+    height: 36px;
 
-  input:focus {
-    outline: none;
-    border-color: var(--text);
-  }
-
-  form button {
-    background: var(--text);
-    color: var(--bg);
-    border: none;
-    border-radius: 4px;
-    padding: 10px 16px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  form button:hover { background: #C9D1DB; }
-
-  .col-labels {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.6fr;
-    font-size: 11px;
-    color: var(--muted);
-    padding: 0 16px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.6fr;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    border-left: 3px solid transparent;
-  }
-
-  .row.flagged {
-    border-left-color: var(--flag);
-    background: rgba(245, 185, 66, 0.05);
-    animation: pulse 1.4s ease-out 1;
-  }
-
-  @keyframes pulse {
-    0%   { background: rgba(245, 185, 66, 0.22); }
-    100% { background: rgba(245, 185, 66, 0.05); }
-  }
-
-  .name .sym {
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  .name .co {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 2px;
-  }
-
-  .price {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    text-align: right;
-    padding-right: 12px;
-  }
-
-  .change {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    text-align: right;
-    padding-right: 12px;
-  }
-
-  .change.up { color: var(--up); }
-  .change.down { color: var(--down); }
-  .change.flat { color: var(--muted); }
-
-  .flag-tag {
-    display: block;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 10px;
-    color: var(--flag);
-    margin-top: 3px;
-  }
-
-  .actions {
     display: flex;
-    gap: 6px;
-    justify-content: flex-end;
     align-items: center;
-  }
+    justify-content: center;
 
-  .actions input {
-    width: 78px;
-    padding: 6px 8px;
-    font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
-  }
+    border-radius: 9px;
 
-  .actions button {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: 'Space Grotesk', sans-serif;
-  }
+    background: linear-gradient(135deg,#5b8cff,#8b5cf6);
 
-  .actions button:hover { border-color: var(--text); }
+    font-size: 18px;
+}
 
-  .actions button.del:hover {
-    border-color: var(--down);
-    color: var(--down);
-  }
+.logo-text {
+    font-size: 15px;
+    font-weight: 700;
+}
 
-  .updated {
-    font-family: 'JetBrains Mono', monospace;
+.logo-text span {
+    display: block;
+    color: var(--muted);
     font-size: 10px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+    font-weight: 500;
+    margin-top: 2px;
+}
 
-  #empty {
-    text-align: center;
+.nav-title {
+    color: #4f596b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    padding: 0 10px;
+    margin: 10px 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 11px 12px;
+    margin: 3px 0;
+
+    border-radius: 7px;
+
     color: var(--muted);
-    padding: 60px 0;
+    font-size: 13px;
+
+    transition: 0.2s;
+}
+
+.nav-item.active {
+    color: white;
+    background: var(--blue-soft);
+}
+
+.nav-item:hover {
+    color: white;
+    background: var(--card-hover);
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    border-top: 1px solid var(--border);
+    padding: 18px 10px 0;
+
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: var(--green);
+
+    box-shadow: 0 0 8px var(--green);
+}
+
+/* ================= MAIN ================= */
+
+.main {
+    margin-left: 230px;
+    padding: 32px 42px 70px;
+
+    max-width: 1500px;
+}
+
+/* ================= TOP BAR ================= */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 32px;
+}
+
+.page-title h1 {
+    margin: 0;
+
+    font-size: 25px;
+    letter-spacing: -0.03em;
+}
+
+.page-title p {
+    margin: 7px 0 0;
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.market-info {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.market-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    font-size: 12px;
+    color: var(--green);
+}
+
+.clock {
+    font-family: 'JetBrains Mono';
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* ================= SUMMARY CARDS ================= */
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 16px;
+
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: linear-gradient(145deg,#121925,#0f141e);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    padding: 20px;
+
+    transition: 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    border-color: #303b4e;
+}
+
+.summary-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.summary-value {
+    font-size: 25px;
+    font-weight: 700;
+
+    margin-top: 10px;
+}
+
+.summary-sub {
+    margin-top: 5px;
+
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.green {
+    color: var(--green);
+}
+
+.red {
+    color: var(--red);
+}
+
+.yellow {
+    color: var(--yellow);
+}
+
+/* ================= ADD STOCK ================= */
+
+.add-section {
+    margin-bottom: 28px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 12px;
+}
+
+.section-heading h2 {
+    margin: 0;
+
+    font-size: 15px;
+}
+
+.section-heading span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.add-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr auto;
+    gap: 10px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+input {
+    width: 100%;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+
+    color: var(--text);
+
+    border-radius: 7px;
+
+    padding: 12px 13px;
+
+    font-family: 'Inter';
+    font-size: 13px;
+
+    transition: 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(91,140,255,0.08);
+}
+
+input::placeholder {
+    color: #566173;
+}
+
+.add-btn {
+    border: none;
+    border-radius: 7px;
+
+    padding: 0 22px;
+
+    background: linear-gradient(135deg,#5b8cff,#7c5cff);
+
+    color: white;
+
+    font-weight: 700;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.add-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+/* ================= WATCHLIST ================= */
+
+.watchlist-container {
+    background: rgba(17,23,34,0.75);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    overflow: hidden;
+}
+
+.watchlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.watchlist-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.watchlist-title h2 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.count {
+    padding: 3px 8px;
+
+    background: var(--blue-soft);
+    color: #86a9ff;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.live {
+    font-size: 10px;
+    color: var(--green);
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ================= TABLE ================= */
+
+.table-head,
+.row {
+    display: grid;
+
+    grid-template-columns:
+        2.2fr
+        1.2fr
+        1.3fr
+        1.2fr
+        2fr;
+}
+
+.table-head {
+    padding: 12px 22px;
+
+    color: #596476;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.table-head div:not(:first-child) {
+    text-align: right;
+}
+
+.row {
+    align-items: center;
+
+    padding: 18px 22px;
+
+    border-bottom: 1px solid rgba(32,41,56,0.75);
+
+    transition: 0.2s;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.row:hover {
+    background: rgba(255,255,255,0.015);
+}
+
+.row.flagged {
+    background: var(--yellow-soft);
+
+    box-shadow:
+        inset 3px 0 0 var(--yellow);
+}
+
+/* ================= STOCK ================= */
+
+.stock {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stock-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #192130;
+
+    color: #aebcff;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    border: 1px solid #263044;
+}
+
+.symbol {
     font-size: 14px;
-  }
+    font-weight: 700;
+}
 
-  @media (max-width: 640px) {
-    form { grid-template-columns: 1fr 1fr; }
-    .col-labels { display: none; }
-    .row { grid-template-columns: 1fr; row-gap: 10px; }
-    .price, .change { text-align: left; padding-right: 0; }
-    .actions { justify-content: flex-start; flex-wrap: wrap; }
-  }
+.company {
+    margin-top: 3px;
+
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.price-cell {
+    text-align: right;
+
+    font-family: 'JetBrains Mono';
+
+    font-size: 13px;
+}
+
+.updated {
+    margin-top: 4px;
+
+    font-size: 9px;
+    color: #555f70;
+}
+
+.change-cell {
+    text-align: right;
+
+    font-family: 'JetBrains Mono';
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.percent {
+    display: inline-block;
+
+    margin-left: 5px;
+}
+
+.change-cell.up {
+    color: var(--green);
+}
+
+.change-cell.down {
+    color: var(--red);
+}
+
+.change-cell.flat {
+    color: var(--muted);
+}
+
+/* ================= MEANINGFUL ================= */
+
+.alert-cell {
+    text-align: right;
+}
+
+.meaningful {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 5px 9px;
+
+    border-radius: 5px;
+
+    background: var(--yellow-soft);
+
+    color: var(--yellow);
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.normal {
+    color: #596476;
+    font-size: 10px;
+}
+
+/* ================= ACTIONS ================= */
+
+.actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 6px;
+}
+
+.price-input {
+    width: 85px;
+
+    padding: 7px 8px;
+
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+}
+
+.action-btn {
+    padding: 7px 10px;
+
+    border-radius: 5px;
+
+    background: transparent;
+
+    border: 1px solid var(--border);
+
+    color: #b4bdcb;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.action-btn:hover {
+    border-color: var(--blue);
+    color: white;
+}
+
+.delete-btn:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+/* ================= EMPTY ================= */
+
+#empty {
+    padding: 70px 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.empty-icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+/* ================= FOOTER ================= */
+
+.footer {
+    text-align: center;
+
+    margin-top: 30px;
+
+    color: #424b5b;
+
+    font-size: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1000px) {
+
+    .sidebar {
+        width: 70px;
+    }
+
+    .logo-text,
+    .nav-item span,
+    .nav-title,
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .logo {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .nav-item {
+        justify-content: center;
+    }
+
+    .main {
+        margin-left: 70px;
+    }
+
+    .summary {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+
+@media(max-width:750px) {
+
+    body {
+        padding: 0;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 22px 15px 50px;
+    }
+
+    .topbar {
+        align-items: flex-start;
+    }
+
+    .market-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .summary {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 15px;
+    }
+
+    .add-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .add-btn {
+        padding: 12px;
+    }
+
+    .table-head {
+        display: none;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        gap: 13px;
+        padding: 18px;
+    }
+
+    .price-cell,
+    .change-cell,
+    .alert-cell {
+        text-align: left;
+    }
+
+    .actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
 </style>
 </head>
+
 <body>
 
-<div class="wrap">
-  <header>
-    <h1>Smart Market Watchlist</h1>
-    <span id="clock"></span>
-  </header>
+<!-- ================= SIDEBAR ================= -->
 
-  <form id="addForm">
-    <input type="text" id="symbol" placeholder="SYMBOL" required>
-    <input type="text" id="companyName" placeholder="Company name" required>
-    <input type="number" id="currentPrice" placeholder="Price" step="0.01" required>
-    <button type="submit">Add</button>
-  </form>
+<aside class="sidebar">
 
-  <div class="col-labels">
-    <span>Stock</span>
-    <span style="text-align:right; padding-right:12px;">Price</span>
-    <span style="text-align:right; padding-right:12px;">Change</span>
-    <span></span>
-  </div>
+    <div class="logo">
 
-  <div id="list"></div>
-  <div id="empty" style="display:none;">Nothing on your watchlist yet. Add a stock above to start tracking it.</div>
-</div>
+        <div class="logo-icon">
+            📈
+        </div>
+
+        <div class="logo-text">
+            MarketWatch
+            <span>SMART WATCHLIST</span>
+        </div>
+
+    </div>
+
+    <div class="nav-title">
+        Workspace
+    </div>
+
+    <div class="nav-item active">
+        <span>▦</span>
+        <span>Watchlist</span>
+    </div>
+
+    <div class="nav-item">
+        <span>◈</span>
+        <span>Market Overview</span>
+    </div>
+
+    <div class="nav-item">
+        <span>◷</span>
+        <span>Activity</span>
+    </div>
+
+    <div class="nav-title">
+        Tools
+    </div>
+
+    <div class="nav-item">
+        <span>⚙</span>
+        <span>Settings</span>
+    </div>
+
+    <div class="sidebar-bottom">
+
+        <div class="status">
+
+            <div class="status-dot"></div>
+
+            System operational
+
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+    <!-- TOP BAR -->
+
+    <div class="topbar">
+
+        <div class="page-title">
+
+            <h1>Smart Market Watchlist</h1>
+
+            <p>
+                Monitor your stocks and discover what meaningfully changed.
+            </p>
+
+        </div>
+
+        <div class="market-info">
+
+            <div class="market-status">
+                <span class="status-dot"></span>
+                Market monitor active
+            </div>
+
+            <div class="clock" id="clock"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <section class="summary">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Watchlist
+            </div>
+
+            <div class="summary-value" id="totalStocks">
+                0
+            </div>
+
+            <div class="summary-sub">
+                stocks tracked
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Meaningful Changes
+            </div>
+
+            <div class="summary-value yellow" id="meaningfulStocks">
+                0
+            </div>
+
+            <div class="summary-sub">
+                need your attention
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Positive
+            </div>
+
+            <div class="summary-value green" id="positiveStocks">
+                0
+            </div>
+
+            <div class="summary-sub">
+                stocks moving up
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Negative
+            </div>
+
+            <div class="summary-value red" id="negativeStocks">
+                0
+            </div>
+
+            <div class="summary-sub">
+                stocks moving down
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ADD STOCK -->
+
+    <section class="add-section">
+
+        <div class="section-heading">
+
+            <h2>Add to Watchlist</h2>
+
+            <span>Track a new stock</span>
+
+        </div>
+
+
+        <form class="add-form" id="addForm">
+
+            <input
+                type="text"
+                id="symbol"
+                placeholder="Stock symbol"
+                required
+            >
+
+            <input
+                type="text"
+                id="companyName"
+                placeholder="Company name"
+                required
+            >
+
+            <input
+                type="number"
+                id="currentPrice"
+                placeholder="Current price"
+                step="0.01"
+                required
+            >
+
+            <button class="add-btn" type="submit">
+                + Add Stock
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- WATCHLIST -->
+
+    <section class="watchlist-container">
+
+        <div class="watchlist-header">
+
+            <div class="watchlist-title">
+
+                <h2>Your Watchlist</h2>
+
+                <span class="count" id="stockCount">
+                    0
+                </span>
+
+            </div>
+
+            <div class="live">
+
+                <span class="status-dot"></span>
+
+                LIVE MONITORING
+
+            </div>
+
+        </div>
+
+
+        <!-- TABLE HEADER -->
+
+        <div class="table-head">
+
+            <div>Stock</div>
+
+            <div>Price</div>
+
+            <div>Change</div>
+
+            <div>Status</div>
+
+            <div>Actions</div>
+
+        </div>
+
+
+        <div id="list"></div>
+
+
+        <div id="empty">
+
+            <div class="empty-icon">
+                ☆
+            </div>
+
+            Nothing on your watchlist yet.
+
+            <br>
+
+            Add a stock above to start tracking it.
+
+        </div>
+
+    </section>
+
+
+    <div class="footer">
+
+        Smart Market Watchlist · Market intelligence at a glance
+
+    </div>
+
+</main>
+
 
 <script>
+
 const API_BASE = "http://localhost:8080/api/watchlist";
 
+
+/* ================= CLOCK ================= */
+
 function tickClock() {
-  document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+
+    const clock = document.getElementById("clock");
+
+    clock.textContent =
+        new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
 }
+
 tickClock();
+
 setInterval(tickClock, 1000);
 
+
+/* ================= LOAD ================= */
+
 async function loadWatchlist() {
-  const res = await fetch(API_BASE);
-  const items = await res.json();
-  renderList(items);
+
+    try {
+
+        const response = await fetch(API_BASE);
+
+        if (!response.ok) {
+            throw new Error("Unable to load watchlist");
+        }
+
+        const items = await response.json();
+
+        renderList(items);
+
+        updateSummary(items);
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("list").innerHTML = `
+            <div style="
+                padding:40px;
+                text-align:center;
+                color:#ef4444;
+                font-size:13px;
+            ">
+                Unable to connect to the backend.
+                <br><br>
+                Make sure Spring Boot is running on port 8080.
+            </div>
+        `;
+
+    }
+
 }
+
+
+/* ================= SUMMARY ================= */
+
+function updateSummary(items) {
+
+    const meaningful =
+        items.filter(item => item.meaningfulChange).length;
+
+    const positive =
+        items.filter(item => item.changeAmount > 0).length;
+
+    const negative =
+        items.filter(item => item.changeAmount < 0).length;
+
+
+    document.getElementById("totalStocks").textContent =
+        items.length;
+
+    document.getElementById("stockCount").textContent =
+        items.length;
+
+    document.getElementById("meaningfulStocks").textContent =
+        meaningful;
+
+    document.getElementById("positiveStocks").textContent =
+        positive;
+
+    document.getElementById("negativeStocks").textContent =
+        negative;
+}
+
+
+/* ================= RENDER ================= */
 
 function renderList(items) {
-  const list = document.getElementById("list");
-  const empty = document.getElementById("empty");
-  list.innerHTML = "";
 
-  if (items.length === 0) {
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
+    const list =
+        document.getElementById("list");
 
-  items.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "row" + (item.meaningfulChange ? " flagged" : "");
+    const empty =
+        document.getElementById("empty");
 
-    const dir = item.changeAmount > 0 ? "up" : (item.changeAmount < 0 ? "down" : "flat");
-    const sign = item.changeAmount > 0 ? "+" : "";
 
-    row.innerHTML = `
-      <div class="name">
-        <div class="sym">${item.symbol}</div>
-        <div class="co">${item.companyName}</div>
-      </div>
-      <div class="price">
-        ₹${item.currentPrice.toFixed(2)}
-        <div class="updated">${formatTime(item.priceUpdatedAt)}</div>
-      </div>
-      <div class="change ${dir}">
-        ${sign}${item.changeAmount.toFixed(2)} (${sign}${item.changePercent.toFixed(2)}%)
-        ${item.meaningfulChange ? '<span class="flag-tag">● meaningful</span>' : ''}
-      </div>
-      <div class="actions">
-        <input type="number" step="0.01" placeholder="new" id="price-${item.id}">
-        <button onclick="updatePrice(${item.id})">Update</button>
-        <button class="del" onclick="deleteItem(${item.id})">Del</button>
-      </div>
-    `;
-    list.appendChild(row);
-  });
+    list.innerHTML = "";
+
+
+    if (items.length === 0) {
+
+        empty.style.display = "block";
+
+        return;
+
+    }
+
+
+    empty.style.display = "none";
+
+
+    items.forEach(item => {
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "row" +
+            (item.meaningfulChange ? " flagged" : "");
+
+
+        const direction =
+            item.changeAmount > 0
+                ? "up"
+                : item.changeAmount < 0
+                    ? "down"
+                    : "flat";
+
+
+        const sign =
+            item.changeAmount > 0
+                ? "+"
+                : "";
+
+
+        const initial =
+            item.symbol.substring(0,3);
+
+
+        row.innerHTML = `
+
+            <div class="stock">
+
+                <div class="stock-icon">
+                    ${initial}
+                </div>
+
+                <div>
+
+                    <div class="symbol">
+                        ${escapeHTML(item.symbol)}
+                    </div>
+
+                    <div class="company">
+                        ${escapeHTML(item.companyName)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="price-cell">
+
+                ₹${Number(item.currentPrice).toFixed(2)}
+
+                <div class="updated">
+
+                    Updated ${formatTime(item.priceUpdatedAt)}
+
+                </div>
+
+            </div>
+
+
+            <div class="change-cell ${direction}">
+
+                ${sign}${Number(item.changeAmount).toFixed(2)}
+
+                <span class="percent">
+
+                    (${sign}${Number(item.changePercent).toFixed(2)}%)
+
+                </span>
+
+            </div>
+
+
+            <div class="alert-cell">
+
+                ${
+                    item.meaningfulChange
+
+                    ?
+
+                    `
+                    <span class="meaningful">
+
+                        ⚠ Meaningful
+
+                    </span>
+                    `
+
+                    :
+
+                    `
+                    <span class="normal">
+                        No major change
+                    </span>
+                    `
+                }
+
+            </div>
+
+
+            <div class="actions">
+
+                <input
+                    class="price-input"
+                    type="number"
+                    step="0.01"
+                    placeholder="New price"
+                    id="price-${item.id}"
+                >
+
+                <button
+                    class="action-btn"
+                    onclick="updatePrice(${item.id})"
+                >
+                    Update
+                </button>
+
+                <button
+                    class="action-btn delete-btn"
+                    onclick="deleteItem(${item.id})"
+                >
+                    Delete
+                </button>
+
+            </div>
+
+        `;
+
+
+        list.appendChild(row);
+
+    });
+
 }
 
-function formatTime(ts) {
-  if (!ts) return "—";
-  const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+/* ================= ESCAPE HTML ================= */
+
+function escapeHTML(value) {
+
+    const div = document.createElement("div");
+
+    div.textContent = value;
+
+    return div.innerHTML;
+
 }
 
-document.getElementById("addForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const symbol = document.getElementById("symbol").value.trim().toUpperCase();
-  const companyName = document.getElementById("companyName").value.trim();
-  const currentPrice = parseFloat(document.getElementById("currentPrice").value);
 
-  await fetch(API_BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ symbol, companyName, currentPrice })
-  });
+/* ================= TIME ================= */
 
-  e.target.reset();
-  loadWatchlist();
+function formatTime(timestamp) {
+
+    if (!timestamp) {
+        return "—";
+    }
+
+    const date =
+        new Date(timestamp);
+
+    return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+}
+
+
+/* ================= ADD STOCK ================= */
+
+document
+.getElementById("addForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+
+    const symbol =
+        document
+        .getElementById("symbol")
+        .value
+        .trim()
+        .toUpperCase();
+
+
+    const companyName =
+        document
+        .getElementById("companyName")
+        .value
+        .trim();
+
+
+    const currentPrice =
+        parseFloat(
+            document
+            .getElementById("currentPrice")
+            .value
+        );
+
+
+    if (!symbol || !companyName || isNaN(currentPrice)) {
+
+        alert("Please enter valid stock details.");
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(API_BASE, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    symbol,
+                    companyName,
+                    currentPrice
+
+                })
+
+            });
+
+
+        if (!response.ok) {
+
+            throw new Error("Failed to add stock");
+
+        }
+
+
+        event.target.reset();
+
+        await loadWatchlist();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to add stock. Check your backend.");
+
+    }
+
 });
 
+
+/* ================= UPDATE PRICE ================= */
+
 async function updatePrice(id) {
-  const input = document.getElementById(`price-${id}`);
-  const newPrice = parseFloat(input.value);
-  if (isNaN(newPrice)) {
-    alert("Enter a valid price first.");
-    return;
-  }
 
-  await fetch(`${API_BASE}/${id}/price`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ currentPrice: newPrice })
-  });
+    const input =
+        document.getElementById(`price-${id}`);
 
-  loadWatchlist();
+
+    const newPrice =
+        parseFloat(input.value);
+
+
+    if (isNaN(newPrice) || newPrice <= 0) {
+
+        alert("Enter a valid price.");
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/${id}/price`,
+                {
+
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        currentPrice: newPrice
+
+                    })
+
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error("Update failed");
+
+        }
+
+
+        input.value = "";
+
+        await loadWatchlist();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to update price.");
+
+    }
+
 }
+
+
+/* ================= DELETE ================= */
 
 async function deleteItem(id) {
-  if (!confirm("Remove this stock from your watchlist?")) return;
-  await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
-  loadWatchlist();
+
+    if (
+        !confirm(
+            "Remove this stock from your watchlist?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error("Delete failed");
+
+        }
+
+
+        await loadWatchlist();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to delete stock.");
+
+    }
+
 }
 
+
+/* ================= START ================= */
+
 loadWatchlist();
+
 </script>
 
 </body>
 </html>
+```
